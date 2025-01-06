@@ -1,0 +1,23 @@
+FROM public.ecr.aws/docker/library/node:16-alpine AS react-build
+WORKDIR /app
+COPY . ./
+RUN npm ci
+
+# Declare your build argument
+ARG env
+# Choose either staging or production
+RUN npm run build
+# RUN npm run build:staging
+# RUN npm run build:production
+
+# Bundle static assets with nginx
+FROM public.ecr.aws/docker/library/nginx:1.21.0-alpine as production
+ENV NODE_ENV production
+# Copy built assets from `builder` image
+ COPY --from=react-build /app/build /usr/share/nginx/html/event
+# Add your nginx.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Expose port
+EXPOSE 80
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
