@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_REGISTRY = 'your-registry.azurecr.io'  // Replace with your registry
+        DOCKER_REGISTRY = 'docker.io'  // Replace with your registry
         DOCKER_IMAGE = 'your-app-name'
         DOCKER_TAG = "${BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = 'docker-cred-id'  // Jenkins credentials ID
