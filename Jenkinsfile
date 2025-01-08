@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image
-                    sh 'docker build -t ${DOCKER_IMAGE_NAME} .'
+                    sh 'docker build -t ${DOCKER_IMAGE} .'
                 }
             }
         }
@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     // Tag the Docker image
-                    sh "docker tag ${DOCKER_IMAGE_NAME} ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}"
+                    sh "docker tag ${DOCKER_IMAGE} ${DOCKER_USERNAME}/${DOCKER_IMAGE}"
                 }
             }
         }
@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script {
                     // Push the tagged image to Docker Hub
-                    sh "docker push  ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}"
+                    sh "docker push  ${DOCKER_USERNAME}/${DOCKER_IMAGE}"
                 }
             }
         }
@@ -59,7 +59,7 @@ pipeline {
         stage('Clean Up') {
             steps {
                 // Remove local Docker images
-                sh "docker rmi  ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest"
+                sh "docker rmi  ${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
             }
         }
     }
