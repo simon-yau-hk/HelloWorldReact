@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         DOCKER_REGISTRY = 'docker.io'  // Replace with your registry
-        DOCKER_IMAGE = 'your-app-name'
+        DOCKER_IMAGE = 'my-web-app'
         DOCKER_TAG = "${BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = 'docker-cred-id'  // Jenkins credentials ID
     }
