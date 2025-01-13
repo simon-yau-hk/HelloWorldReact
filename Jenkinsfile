@@ -41,8 +41,15 @@ pipeline {
                  
                   withCredentials([usernamePassword(credentialsId: 'github-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                         sh """
+                            echo "Testing Git credentials..."
+                            git config --global credential.helper store
                             git config --global user.email "simon_yau@hotmail.com.hk"
                             git config --global user.name "${GIT_USERNAME}"
+
+                               # Update remote URL to include credentials
+                    git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/\$(git remote get-url origin | sed 's/https:\\/\\/github.com\\///')"
+                    
+                    echo "Updated Git configuration"
                             git tag ${newTag}
                             git push origin ${newTag}
                         """
