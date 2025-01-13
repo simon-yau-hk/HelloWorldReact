@@ -5,6 +5,8 @@ pipeline {
         DOCKER_IMAGE = 'my-web-app'
         DOCKER_USERNAME = 'simonyauwl'
         DOCKER_CREDENTIALS_ID = 'docker-cred-id'  // Jenkins credentials ID
+         // Add Git tag/commit environment variables
+        NEW_TAG = ''
     }
     
     stages {
@@ -12,6 +14,35 @@ pipeline {
             steps {
                 // Get code from repository
                 checkout scm
+            }
+        }
+
+        stage('Create New Tag') {
+            steps {
+                script {
+                    // Get the latest tag
+                    def latestTag = sh(returnStdout: true, script: 'git describe --tags --abbrev=0').trim()
+                    
+                    // Parse version numbers
+                    def (major, minor, patch) = latestTag.replaceAll('v', '').tokenize('.')
+                    
+                    // Increment patch version
+                    def newPatch = patch.toInteger() + 1
+                    def newTag = "v${major}.${minor}.${newPatch}"
+                    
+                      // Store the new tag for later use
+                    env.NEW_TAG = newTag
+
+                    // Create and push new tag
+                    sh """
+                        git config --global user.email "jenkins@example.com"
+                        git config --global user.name "Jenkins"
+                        git tag ${newTag}
+                        git push origin ${newTag}
+                    """
+                    
+                    echo "Created new tag: ${newTag}"
+                }
             }
         }
 
@@ -40,6 +71,8 @@ pipeline {
         stage('Tag Docker Image') {
             steps {
                 script {
+                    // Tag with Git version
+                    sh "docker tag ${DOCKER_IMAGE} ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${NEW_TAG}"
                     // Tag the Docker image
                     sh "docker tag ${DOCKER_IMAGE} ${DOCKER_USERNAME}/${DOCKER_IMAGE}"
                 }
@@ -50,6 +83,7 @@ pipeline {
             steps {
                 script {
                     // Push the tagged image to Docker Hub
+                    sh "docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${NEW_TAG}"
                     sh "docker push  ${DOCKER_USERNAME}/${DOCKER_IMAGE}"
                 }
             }
@@ -59,6 +93,7 @@ pipeline {
         stage('Clean Up') {
             steps {
                 // Remove local Docker images
+                sh "docker rmi ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${NEW_TAG}"
                 sh "docker rmi  ${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
             }
         }
