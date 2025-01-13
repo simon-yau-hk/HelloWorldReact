@@ -38,9 +38,9 @@ pipeline {
                     env.NEW_TAG = newTag
 
                     // Create and push new tag
+                    // git config --global user.email "simon_yau@hotmail.com.hk"
+                    // git config --global user.name "simon-yau-hk"
                     sh """
-                        git config --global user.email "jenkins@example.com"
-                        git config --global user.name "Jenkins"
                         git tag ${newTag}
                         git push origin ${newTag}
                     """
