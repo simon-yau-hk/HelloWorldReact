@@ -21,8 +21,19 @@ pipeline {
             steps {
                 script {
                     echo "Repository URL: \$(git config --get remote.origin.url)"
-                    echo "Current branch: \$(git branch --show-current)"
-                    // First, make sure we fetch all tags
+                       // Debug Git information
+                        sh """
+                            echo "Debug Git Information:"
+                            echo "Current directory: \$(pwd)"
+                            echo "Git remote URLs:"
+                            git remote -v
+                            echo "Current branch:"
+                            git branch
+                            echo "All tags:"
+                            git tag -l
+                            echo "Git status:"
+                            git status
+                        """
                     sh "git fetch --tags"
                     // Get the latest tag
                     def latestTag = sh(returnStdout: true, script: 'git describe --tags --abbrev=0').trim()
@@ -39,22 +50,19 @@ pipeline {
 
                     // Create and push new tag
                  
-                  withCredentials([usernamePassword(credentialsId: 'github-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    withCredentials([usernamePassword(credentialsId: 'github-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        // Get the repository URL and modify it
+                        def repoUrl = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                        def repoPath = repoUrl.replaceAll('https://github.com/', '')
+                        
                         sh """
-                            echo "Testing Git credentials..."
-                            git config --global credential.helper store
                             git config --global user.email "simon_yau@hotmail.com.hk"
                             git config --global user.name "${GIT_USERNAME}"
-
-                               # Update remote URL to include credentials
-                    git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/\$(git remote get-url origin | sed 's/https:\\/\\/github.com\\///')"
-                    
-                    echo "Updated Git configuration"
+                            git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${repoPath}
                             git tag ${newTag}
                             git push origin ${newTag}
                         """
                     }
-                    
                     echo "Created new tag: ${newTag}"
                 }
             }
