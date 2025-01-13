@@ -39,12 +39,14 @@ pipeline {
 
                     // Create and push new tag
                  
-                    sh """
-                        git config --global user.email "simon_yau@hotmail.com.hk"
-                        git config --global user.name "simon-yau-hk"
-                        git tag ${newTag}
-                        git push origin ${newTag}
-                    """
+                  withCredentials([usernamePassword(credentialsId: 'github-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        sh """
+                            git config --global user.email "simon_yau@hotmail.com.hk"
+                            git config --global user.name "${GIT_USERNAME}"
+                            git tag ${newTag}
+                            git push origin ${newTag}
+                        """
+                    }
                     
                     echo "Created new tag: ${newTag}"
                 }
