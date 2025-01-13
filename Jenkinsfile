@@ -20,6 +20,10 @@ pipeline {
         stage('Create New Tag') {
             steps {
                 script {
+                    echo "Repository URL: \$(git config --get remote.origin.url)"
+                    echo "Current branch: \$(git branch --show-current)"
+                    // First, make sure we fetch all tags
+                    sh "git fetch --tags"
                     // Get the latest tag
                     def latestTag = sh(returnStdout: true, script: 'git describe --tags --abbrev=0').trim()
                     
